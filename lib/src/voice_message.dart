@@ -254,7 +254,7 @@ class _VoiceMessageState extends State<VoiceMessage>
           Uri.parse(widget.audioSrc.toString()),
         ),
         initialPosition: Duration.zero,
-        preload: true);
+        preload: false);
     // setUrl(widget.audioSrc.toString());
     duration = _audioDuration!.inSeconds;
     maxDurationForSlider = duration + .0;
