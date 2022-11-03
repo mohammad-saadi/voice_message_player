@@ -18,6 +18,7 @@ class VoiceMessage extends StatefulWidget {
     Key? key,
     required this.audioSrc,
     required this.me,
+    required this.player,
     this.noiseCount = 27,
     this.meBgColor = AppColors.pink,
     this.contactBgColor = const Color(0xffffffff),
@@ -27,6 +28,7 @@ class VoiceMessage extends StatefulWidget {
     this.meFgColor = const Color(0xffffffff),
     this.played = false,
     this.onPlay,
+    this.onStop,
   }) : super(key: key);
 
   final Source audioSrc;
@@ -39,6 +41,8 @@ class VoiceMessage extends StatefulWidget {
       contactPlayIconColor;
   final bool played, me;
   Function()? onPlay;
+  Function()? onStop;
+  final AudioPlayer player;
 
   @override
   _VoiceMessageState createState() => _VoiceMessageState();
@@ -46,8 +50,8 @@ class VoiceMessage extends StatefulWidget {
 
 class _VoiceMessageState extends State<VoiceMessage>
     with SingleTickerProviderStateMixin {
-  final AudioPlayer _player = AudioPlayer();
   final double maxNoiseHeight = 6.w(), noiseWidth = 26.5.w();
+  late final AudioPlayer _player;
   Duration? _audioDuration;
   double maxDurationForSlider = .0000001;
   bool _isPlaying = false, x2 = false, _audioConfigurationDone = false;
@@ -57,6 +61,7 @@ class _VoiceMessageState extends State<VoiceMessage>
 
   @override
   void initState() {
+    _player = widget.player;
     _setDuration();
     super.initState();
   }
@@ -231,15 +236,15 @@ class _VoiceMessageState extends State<VoiceMessage>
   _setPlayingStatus() => _isPlaying = _playingStatus == 1;
 
   _startPlaying() async {
-    // _playingStatus =
     await _player.play(widget.audioSrc);
+    _playingStatus = 1;
     _setPlayingStatus();
     _controller!.forward();
   }
 
   _stopPlaying() async {
-    // _playingStatus =
     await _player.pause();
+    _playingStatus = 0;
     _controller!.stop();
   }
 
