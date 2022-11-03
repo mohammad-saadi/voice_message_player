@@ -29,7 +29,7 @@ class VoiceMessage extends StatefulWidget {
     this.onPlay,
   }) : super(key: key);
 
-  final String audioSrc;
+  final Source audioSrc;
   final int noiseCount;
   final Color meBgColor,
       meFgColor,
@@ -231,18 +231,21 @@ class _VoiceMessageState extends State<VoiceMessage>
   _setPlayingStatus() => _isPlaying = _playingStatus == 1;
 
   _startPlaying() async {
-    _playingStatus = await _player.play(widget.audioSrc);
+    // _playingStatus =
+    await _player.play(widget.audioSrc);
     _setPlayingStatus();
     _controller!.forward();
   }
 
   _stopPlaying() async {
-    _playingStatus = await _player.pause();
+    // _playingStatus =
+    await _player.pause();
     _controller!.stop();
   }
 
   void _setDuration() async {
-    _audioDuration = await jsAudio.AudioPlayer().setUrl(widget.audioSrc);
+    _audioDuration =
+        await jsAudio.AudioPlayer().setUrl(widget.audioSrc.toString());
     duration = _audioDuration!.inSeconds;
     maxDurationForSlider = duration + .0;
 
@@ -296,7 +299,7 @@ class _VoiceMessageState extends State<VoiceMessage>
   }
 
   void _listenToRemaningTime() {
-    _player.onAudioPositionChanged.listen((Duration p) {
+    _player.onPositionChanged.listen((Duration p) {
       final _newRemaingTime1 = p.toString().split('.')[0];
       final _newRemaingTime2 =
           _newRemaingTime1.substring(_newRemaingTime1.length - 5);
