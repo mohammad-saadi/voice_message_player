@@ -29,9 +29,10 @@ class VoiceMessage extends StatefulWidget {
     this.played = false,
     this.onPlay,
     this.onStop,
+    required this.listener,
   }) : super(key: key);
 
-  final Source audioSrc;
+  final String audioSrc;
   final int noiseCount;
   final Color meBgColor,
       meFgColor,
@@ -42,6 +43,7 @@ class VoiceMessage extends StatefulWidget {
   final bool played, me;
   Function()? onPlay;
   Function()? onStop;
+  ValueNotifier listener;
   final AudioPlayer player;
 
   @override
@@ -62,7 +64,11 @@ class _VoiceMessageState extends State<VoiceMessage>
   @override
   void initState() {
     _player = widget.player;
-    _setDuration();
+
+    widget.listener.addListener(() {
+      _stopPlaying();
+    });
+    // _setDuration();
     super.initState();
   }
 
@@ -111,19 +117,29 @@ class _VoiceMessageState extends State<VoiceMessage>
           width: 8.w(),
           height: 8.w(),
           child: InkWell(
-            onTap: () =>
-                !_audioConfigurationDone ? null : _changePlayingStatus(),
+            onTap: () => !_audioConfigurationDone
+                ? _setDuration()
+                : _changePlayingStatus(),
             child: !_audioConfigurationDone
-                ? Container(
-                    padding: const EdgeInsets.all(8),
-                    width: 10,
-                    height: 0,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1,
-                      color:
-                          widget.me ? widget.meFgColor : widget.contactFgColor,
-                    ),
+                ?
+                // Container(
+                //     padding: const EdgeInsets.all(8),
+                //     width: 10,
+                //     height: 0,
+                //     child:
+                Icon(
+                    Icons.arrow_circle_down_sharp,
+                    color: widget.me
+                        ? widget.mePlayIconColor
+                        : widget.contactPlayIconColor,
+                    size: 5.w(),
                   )
+                //  CircularProgressIndicator(
+                //   strokeWidth: 1,
+                //   color:
+                //       widget.me ? widget.meFgColor : widget.contactFgColor,
+                // ),
+                // )
                 : Icon(
                     _isPlaying ? Icons.pause : Icons.play_arrow,
                     color: widget.me
@@ -236,7 +252,7 @@ class _VoiceMessageState extends State<VoiceMessage>
   _setPlayingStatus() => _isPlaying = _playingStatus == 1;
 
   _startPlaying() async {
-    await _player.play(widget.audioSrc);
+    await _player.play(UrlSource(widget.audioSrc));
     _playingStatus = 1;
     _setPlayingStatus();
     _controller!.forward();
@@ -245,6 +261,10 @@ class _VoiceMessageState extends State<VoiceMessage>
   _stopPlaying() async {
     await _player.pause();
     _playingStatus = 0;
+    setState(() {
+      _setPlayingStatus();
+    });
+
     _controller!.stop();
   }
 
@@ -254,7 +274,7 @@ class _VoiceMessageState extends State<VoiceMessage>
           Uri.parse(widget.audioSrc.toString()),
         ),
         initialPosition: Duration.zero,
-        preload: false);
+        preload: true);
     // setUrl(widget.audioSrc.toString());
     duration = _audioDuration!.inSeconds;
     maxDurationForSlider = duration + .0;
